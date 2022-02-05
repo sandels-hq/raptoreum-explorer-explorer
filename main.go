@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +15,7 @@ import (
 )
 
 var status int64
+var delay int64
 
 func load(ctx context.Context, url string) {
 	startedAt := time.Now()
@@ -46,6 +48,7 @@ func load(ctx context.Context, url string) {
 	stop = true
 	<-done
 	fmt.Printf("w, %.1fs\n", time.Since(startedAt).Seconds())
+	time.Sleep(time.Duration(delay) * time.Second)
 
 	if status != 200 {
 		log.Fatalln("not 200", status)
@@ -53,6 +56,8 @@ func load(ctx context.Context, url string) {
 
 }
 func main() {
+	flag.Int64Var(&delay, "delay", 1, "delay in seconds")
+	flag.Parse()
 	ctx, cancel := chromedp.NewExecAllocator(context.Background(), append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
 	defer cancel()
 	ctx, cancel = chromedp.NewContext(ctx)
